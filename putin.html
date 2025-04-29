@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Leader Timer</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      background: #e6f0fa;
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #1f2937;
+      color: white;
+      height: 100vh;
+      position: fixed;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    .sidebar h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #facc15;
+    }
+
+    .sidebar a {
+      color: #d1d5db;
+      text-decoration: none;
+      margin: 0.5rem 0;
+      font-weight: bold;
+    }
+
+    .sidebar a:hover {
+      color: #ffffff;
+    }
+
+    .main-wrapper {
+      margin-left: 220px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      background-color: #202020;
+      color: white;
+      width: 100%;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    nav {
+      margin-top: 1rem;
+    }
+
+    nav a {
+      margin: 0 10px;
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .countdown-container {
+      margin-top: 2rem;
+      padding: 1rem;
+      border: 2px solid #007bff;
+      border-radius: 10px;
+      background-color: #ffffff;
+      text-align: center;
+      width: 90%;
+      max-width: 600px;
+    }
+
+    .countdown {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      color: #202020;
+    }
+
+    .countdown-bar {
+      width: 100%;
+      height: 20px;
+      background-color: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .countdown-fill {
+      height: 100%;
+      background-color: #007bff;
+      transition: width 0.5s ease;
+    }
+
+    .countdown-percentage {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #202020;
+      font-family: 'Arial Black', Gadget, sans-serif;
+    }
+
+    .main-content {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .portrait {
+      max-width: 300px;
+      flex: 1 1 300px;
+      text-align: center;
+    }
+
+    .portrait img {
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .portrait p {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #333;
+    }
+
+    .watch-question {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: #202020;
+      background-color: #f9f9f9;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      font-family: 'Arial', sans-serif;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .watch-question p {
+      margin: 0.5rem 0;
+    }
+
+    .vote-section {
+      flex: 1 1 300px;
+      max-width: 400px;
+      background-color: rgba(255,255,255,0.9);
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    .vote-red {
+      margin: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #dc2626;
+      color: white;
+    }
+
+    .vote-red:hover {
+      background-color: #b91c1c;
+    }
+
+    .vote-blue {
+      margin: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #2563eb;
+      color: white;
+    }
+
+    .vote-blue:hover {
+      background-color: #1d4ed8;
+    }
+
+    .donation-section {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: rgba(255,255,255,0.9);
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .donation-section button {
+      margin: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+    }
+
+    .donation-section button:hover {
+      background-color: #0056b3;
+    }
+
+    canvas {
+      margin-top: 1rem;
+      max-width: 100%;
+    }
+
+    .total-votes {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      font-weight: bold;
+      color: #444;
+    }
+
+    .leader-watches {
+      margin-top: 3rem;
+      padding: 1rem;
+      background-color: #f4faff;
+      border-radius: 12px;
+      max-width: 900px;
+      width: 95%;
+      text-align: center;
+    }
+
+    .leader-watches h2 {
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      color: #202020;
+    }
+
+    .watch-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .watch-item {
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 0.75rem;
+      max-width: 180px;
+      flex: 1 1 160px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .watch-item img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+    }
+
+    .watch-item p {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #333;
+      line-height: 1.4;
+    }
+
+    .copyright {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      .main-wrapper {
+        margin-left: 0;
+      }
+      .sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>Leader Timer</h2>
+    <a href="Trump.html">Donald Trump</a>
+    <a href="#">Home</a>
+    <a href="#vote">Vote</a>
+    <a href="#donate">Donate</a>
+    <a href="#">About</a>
+  </div>
+  <div class="main-wrapper">
+  
+<header>
+    <h1>Leader Timer</h1>
+  </header>
+  <nav>
+    <a href="#vote">Vote</a>
+    <a href="#donate">Donate</a>
+  </nav>
+
+  <div class="countdown-container">
+    <div class="countdown" id="countdown"></div>
+    <div class="countdown-bar">
+      <div class="countdown-fill" id="countdownFill"></div>
+    </div>
+    <div class="countdown-percentage" id="countdownPercentage"></div>
+  </div>
+
+  <div class="main-content">
+    <div class="portrait">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/5/56/Donald_Trump_official_portrait.jpg"
+      alt="Donald Trump Portrait">
+      <p>Vladimir Putin Illustration</p>
+      <div class="watch-question">
+        <p>Don't you think Vladimir Putinㅡ<br>Who is known to have a background</p>
+        <p>as a special agent will wear a watch<br> on his wrist with cool features that are different from ordinary people?</p>
+        <p><strong>Or wearing a watch like Politician??</strong></p>
+      </div>
+    </div>
+    <div class="vote-section" id="vote">
+      <h2>Cast Your Vote</h2>
+      <p>Better you life than before? or Worse than before? </p>
+      <button onclick="vote('support')" class="vote-red" aria-label="Vote to support Putin">Better than before</button>
+      <button onclick="vote('oppose')" class="vote-blue" aria-label="Vote to oppose Putin">Worse than before</button>
+      <canvas id="voteChart" width="300" height="300"></canvas>
+      <div class="total-votes" id="totalVotes">Total Votes: 0</div>
+    </div>
+  </div>
+
+  <div class="leader-watches">
+    <h2>It would be pretty interesting<br> If you heard about Putin's watch.
+<br> Because Vladimir Putin changed his watch three times with the same model!!</h2>
+    <div class="watch-gallery">
+      <div class="watch-item">
+      <br> <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/Blancpain.leman.aqualung.jpg" alt="Blancpain Leman Aqua Lung">
+        <p><strong>At Fitst time</strong><br><br> This is the story of August 2009, when Putin was enjoying a holiday in Siberia after his second presidency.
+Putin was invited by his family to dine on a small ranch.
+Feeling grateful, Putin reportedly presented his watch to a young shepherd when he farewell with them.</em></p>
+      </div>
+      <div class="watch-item">
+        <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/Blancpain.leman.aqualung.jpg" alt="Blancpain Leman Aqua Lung"><br><br>
+        <p><strong>"Give me one thing to remember you!"
+</strong><br><br>Viktor worked in an arms factory. 
+Putin was a little flustered, but soon laughed and searched his pockets.
+But there was nothing in his pocket, there was a watch on Putin's wrist
+It is said that he gave it to Viktor as a gift.<br> It was his second Watch.</p>
+      </div>
+      <div class="watch-item">
+        <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/Blancpain.leman.aqualung.jpg" alt="Blancpain Leman Aqua Lung">
+        <p><strong>Blancpain Leman Aqua Lung</strong><br><br>Russian President Vladimir Putin, considering his position,
+There are a lot of people who think it's not desirable to gift them expensive watches.
+
+But for Russians, "Watch gift" may mean more precious than we think.
+Although Putin gave his watch twice time, but he still wear a same watch on his wrist.
+Putin, Russia's most powerful man, may have been fascinated with "Blancpain Leman Aqua Lung."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="donation-section" id="donate">
+    <h2>Who will win??</h2>
+    <p>Fight or Fired, Let's donate and Let's see what happens!!</p>
+    <button onclick="window.location.href='https://buymeacoffee.com/'" aria-label="Donate to support the site">Donate</button>
+  </div>
+
+  <footer class="copyright">
+    © 2025 Leader Timer. All rights reserved.
+  </footer>
+  <footer style="font-size: 0.9rem; color: #999; margin-top: 3rem; text-align: center;">
+    This site is for entertainment purposes only. <br>
+    It is not affiliated with any political party or campaign. <br> 
+    All content is user-generated or used under fair use for parody/meme purposes.
+  </footer>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDotg3B6aWHRLlXSbvOdnNjip_S4gJzfhg",
+      authDomain: "donaldtrumph.firebaseapp.com",
+      projectId: "donaldtrumph",
+      storageBucket: "donaldtrumph.appspot.com",
+      messagingSenderId: "1073403134400",
+      appId: "1:1073403134400:web:974bf46acf3f2b5537c825",
+      measurementId: "G-BGB3LM1GRW"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const targetDate = new Date('2030-05-07T12:00:00-05:00');
+    const startDate = new Date('2024-05-07T12:00:00-05:00');
+    const totalTerm = targetDate - startDate;
+
+    function updateCountdown() {
+      const now = new Date();
+      const distance = targetDate - now;
+      const elapsed = now - startDate;
+      const progress = Math.min(100, Math.max(0, (elapsed / totalTerm) * 100));
+
+      document.getElementById("countdownFill").style.width = `${progress}%`;
+      document.getElementById("countdownPercentage").innerText = `Progress: ${progress.toFixed(1)}%`;
+
+      if (distance < 0) {
+        document.getElementById("countdown").innerHTML = "PUTIN'S TIME HAS ENDED.";
+        return;
+      }
+
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      document.getElementById("countdown").innerHTML = `TIME LEFT: ${days}D ${hours}H ${minutes}M ${seconds}S`;
+    }
+
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    const ctx = document.getElementById('voteChart').getContext('2d');
+    const voteChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Support', 'Oppose'],
+        datasets: [{
+          label: 'Votes',
+          data: [0, 0],
+          backgroundColor: ['red', 'blue'],
+          borderColor: ['white', 'white'],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        },
+        cutout: '70%'
+      },
+      plugins: [{
+        id: 'percentageText',
+        afterDraw(chart) {
+          const { ctx, chartArea: { width, height } } = chart;
+          const [support, oppose] = chart.data.datasets[0].data;
+          const total = support + oppose;
+          const sPct = total ? Math.round((support / total) * 100) : 0;
+          const oPct = total ? Math.round((oppose / total) * 100) : 0;
+
+          ctx.save();
+          ctx.font = 'bold 28px Arial';
+          ctx.fillStyle = 'black';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`${sPct}:${oPct}`, chart.width / 2, chart.height / 2);
+        }
+      }]
+    });
+
+    async function vote(type) {
+      const now = Date.now();
+      const lastVote = parseInt(localStorage.getItem('lastVoteTime'), 10) || 0;
+      if (now - lastVote < 60000) {
+        alert('Just wait. After 1minute, You’ll see.');
+        return;
+      }
+      localStorage.setItem('lastVoteTime', now);
+      castVote(type);
+    }
+
+    function updateChart(support, oppose) {
+      voteChart.data.datasets[0].data = [support, oppose];
+      voteChart.update();
+      document.getElementById('totalVotes').innerText = `Total Votes: ${support + oppose}`;
+    }
+
+    function observeVotes() {
+      db.collection('votes').doc('results').onSnapshot((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          updateChart(data.support, data.oppose);
+        }
+      });
+    }
+
+    observeVotes();
+
+    const endpoint = "https://us-central1-donaldtrumph.cloudfunctions.net/castVote";
+
+    function castVote(type) {
+      fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ type })
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Server Error");
+        return res.text();
+      })
+      .then(data => {
+        if (type === 'support') {
+          alert("🔥 Make America Great Again.");
+        } else if (type === 'oppose') {
+          alert("🧯 God blessed to America.");
+        }
+        console.log(data);
+      })
+      .catch(err => {
+        alert("It's Error. Please try again");
+        console.error(err);
+      });
+    }
+  </script>
+</body>
+</html>
