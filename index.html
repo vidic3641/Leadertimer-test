@@ -1,310 +1,333 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>World Leader Timer</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      color: #333;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      background: #e6f0fa;
-    }
-
-    .sidebar {
-      width: 220px;
-      background-color: #1f2937;
-      color: white;
-      height: 100vh;
-      position: fixed;
-      display: flex;
-      flex-direction: column;
-      padding: 1rem;
-      box-sizing: border-box;
-    }
-
-    .sidebar h2 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-      color: #facc15;
-    }
-
-    .sidebar a {
-      color: #d1d5db;
-      text-decoration: none;
-      margin: 0.5rem 0;
-      font-weight: bold;
-    }
-
-    .sidebar a:hover {
-      color: #ffffff;
-    }
-
-    .main-wrapper {
-      margin-left: 220px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    header {
-      background-color: #202020;
-      color: white;
-      width: 100%;
-      padding: 1rem;
-      text-align: center;
-    }
-
-    nav {
-      margin-top: 1rem;
-    }
-
-    nav a {
-      margin: 0 10px;
-      color: #007bff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .countdown-container {
-      margin-top: 2rem;
-      padding: 1rem;
-      border: 2px solid #007bff;
-      border-radius: 10px;
-      background-color: #ffffff;
-      text-align: center;
-      width: 90%;
-      max-width: 600px;
-    }
-
-    .countdown {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      text-transform: uppercase;
-      color: #202020;
-    }
-
-    .countdown-bar {
-      width: 100%;
-      height: 20px;
-      background-color: #ddd;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 0.5rem;
-    }
-
-    .countdown-fill {
-      height: 100%;
-      background-color: #007bff;
-      transition: width 0.5s ease;
-    }
-
-    .countdown-percentage {
-      font-size: 1rem;
-      font-weight: bold;
-      color: #202020;
-      font-family: 'Arial Black', Gadget, sans-serif;
-    }
-
-    .main-content {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 2rem;
-      flex-wrap: wrap;
-      margin-top: 2rem;
-    }
-
-    .portrait {
-      max-width: 300px;
-      flex: 1 1 300px;
-      text-align: center;
-    }
-
-    .portrait img {
-      max-width: 100%;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-
-    .portrait p {
-      margin-top: 0.5rem;
-      font-size: 0.95rem;
-      color: #333;
-    }
-
-    .watch-question {
-      margin-top: 1rem;
-      font-size: 1rem;
-      color: #202020;
-      background-color: #f9f9f9;
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      font-family: 'Arial', sans-serif;
-      line-height: 1.6;
-      text-align: center;
-    }
-
-    .watch-question p {
-      margin: 0.5rem 0;
-    }
-
-    .vote-section {
-      flex: 1 1 300px;
-      max-width: 400px;
-      background-color: rgba(255,255,255,0.9);
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 1rem;
-      box-sizing: border-box;
-      text-align: center;
-    }
-
-    .vote-red {
-      margin: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background-color: #dc2626;
-      color: white;
-    }
-
-    .vote-red:hover {
-      background-color: #b91c1c;
-    }
-
-    .vote-blue {
-      margin: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background-color: #2563eb;
-      color: white;
-    }
-
-    .vote-blue:hover {
-      background-color: #1d4ed8;
-    }
-
-    .donation-section {
-      margin-top: 2rem;
-      padding: 1rem;
-      background-color: rgba(255,255,255,0.9);
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-    }
-
-    .donation-section button {
-      margin: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: white;
-    }
-
-    .donation-section button:hover {
-      background-color: #0056b3;
-    }
-
-    canvas {
-      margin-top: 1rem;
-      max-width: 100%;
-    }
-
-    .total-votes {
-      margin-top: 0.5rem;
-      font-size: 1rem;
-      font-weight: bold;
-      color: #444;
-    }
-
-    .leader-watches {
-      margin-top: 3rem;
-      padding: 1rem;
-      background-color: #f4faff;
-      border-radius: 12px;
-      max-width: 900px;
-      width: 95%;
-      text-align: center;
-    }
-
-    .leader-watches h2 {
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-      color: #202020;
-    }
-
-    .watch-gallery {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1.5rem;
-    }
-
-    .watch-item {
-      background: white;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 0.75rem;
-      max-width: 180px;
-      flex: 1 1 160px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-
-    .watch-item img {
-      width: 100%;
-      height: auto;
-      border-radius: 6px;
-    }
-
-    .watch-item p {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      color: #333;
-      line-height: 1.4;
-    }
-
-    .copyright {
-      text-align: center;
-      font-size: 0.9rem;
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-      color: #666;
-    }
-
-    @media (max-width: 768px) {
-      .main-wrapper {
-        margin-left: 0;
-      }
-      .sidebar {
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>World Leader Timer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+      .menu-toggle {
         display: none;
+        position: fixed;
+        top: 1rem;
+        left: 1rem;
+        z-index: 1001;
+        background: #1f2937;
+        color: white;
+        border: none;
+        font-size: 1.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="sidebar">
+
+      @media (max-width: 768px) {
+        .menu-toggle {
+          display: block;
+        }
+
+        .sidebar {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          height: 100%;
+          z-index: 1000;
+          width: 220px;
+          background-color: #1f2937;
+          padding: 1rem;
+          box-sizing: border-box;
+          transition: transform 0.3s ease;
+        }
+
+        .sidebar.active {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .main-wrapper {
+          margin-left: 0;
+        }
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        background: #e6f0fa;
+      }
+
+      .sidebar {
+        width: 220px;
+        background-color: #1f2937;
+        color: white;
+        height: 100vh;
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        box-sizing: border-box;
+      }
+
+      .sidebar h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        color: #facc15;
+      }
+
+      .sidebar a {
+        color: #d1d5db;
+        text-decoration: none;
+        margin: 0.5rem 0;
+        font-weight: bold;
+      }
+
+      .sidebar a:hover {
+        color: #ffffff;
+      }
+
+      .main-wrapper {
+        margin-left: 220px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      header {
+        background-color: #202020;
+        color: white;
+        width: 100%;
+        padding: 1rem;
+        text-align: center;
+      }
+
+      nav {
+        margin-top: 1rem;
+      }
+
+      nav a {
+        margin: 0 10px;
+        color: #007bff;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .countdown-container {
+        margin-top: 2rem;
+        padding: 1rem;
+        border: 2px solid #007bff;
+        border-radius: 10px;
+        background-color: #ffffff;
+        text-align: center;
+        width: 90%;
+        max-width: 600px;
+      }
+
+      .countdown {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        color: #202020;
+      }
+
+      .countdown-bar {
+        width: 100%;
+        height: 20px;
+        background-color: #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+      }
+
+      .countdown-fill {
+        height: 100%;
+        background-color: #007bff;
+        transition: width 0.5s ease;
+      }
+
+      .countdown-percentage {
+        font-size: 1rem;
+        font-weight: bold;
+        color: #202020;
+        font-family: "Arial Black", Gadget, sans-serif;
+      }
+
+      .main-content {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 2rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+      }
+
+      .portrait {
+        max-width: 300px;
+        flex: 1 1 300px;
+        text-align: center;
+      }
+
+      .portrait img {
+        max-width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .portrait p {
+        margin-top: 0.5rem;
+        font-size: 0.95rem;
+        color: #333;
+      }
+
+      .watch-question {
+        margin-top: 1rem;
+        font-size: 1rem;
+        color: #202020;
+        background-color: #f9f9f9;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        font-family: "Arial", sans-serif;
+        line-height: 1.6;
+        text-align: center;
+      }
+
+      .vote-section {
+        flex: 1 1 300px;
+        max-width: 400px;
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1rem;
+        box-sizing: border-box;
+        text-align: center;
+      }
+
+      .vote-red,
+      .vote-blue {
+        margin: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        color: white;
+      }
+
+      .vote-red {
+        background-color: #dc2626;
+      }
+
+      .vote-red:hover {
+        background-color: #b91c1c;
+      }
+
+      .vote-blue {
+        background-color: #2563eb;
+      }
+
+      .vote-blue:hover {
+        background-color: #1d4ed8;
+      }
+
+      .donation-section {
+        margin-top: 2rem;
+        padding: 1rem;
+        background-color: rgba(255, 255, 255, 0.9);
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+      }
+
+      .donation-section button {
+        margin: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: white;
+      }
+
+      .donation-section button:hover {
+        background-color: #0056b3;
+      }
+
+      canvas {
+        margin-top: 1rem;
+        max-width: 100%;
+      }
+
+      .total-votes {
+        margin-top: 0.5rem;
+        font-size: 1rem;
+        font-weight: bold;
+        color: #444;
+      }
+
+      .leader-watches {
+        margin-top: 3rem;
+        padding: 1rem;
+        background-color: #f4faff;
+        border-radius: 12px;
+        max-width: 900px;
+        width: 95%;
+        text-align: center;
+      }
+
+      .watch-gallery {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.5rem;
+      }
+
+      .watch-item {
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 0.75rem;
+        max-width: 180px;
+        flex: 1 1 160px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .watch-item img {
+        width: 100%;
+        height: auto;
+        border-radius: 6px;
+      }
+
+      .watch-item p {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #333;
+        line-height: 1.4;
+      }
+
+      .copyright {
+        text-align: center;
+        font-size: 0.9rem;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+<div class="sidebar">
     <h2>Leader Timer</h2>
     <a href="putin.html">Vladimir Putin</a>
-     <a href="korea.html">S.Korean Presidential Election</a>
+     <a href="korea">S.Korean Presidential Election</a>
     <a href="#">Home</a>   
     <a href="#donate">Donate</a>
     <a href="#">About</a>
@@ -313,6 +336,7 @@
   
 <header>
     <h1>Leader Timer</h1>
+    <button id="menuToggle" style="display: none;">☰</button>
   </header>
   <nav>
     <a href="#vote">Vote</a>
@@ -515,3 +539,19 @@ Trump wears a watch that perfectly matches both his image and his bank account.<
   </script>
 </body>
 </html>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
