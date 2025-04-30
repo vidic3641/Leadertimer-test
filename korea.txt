@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World Leader Timer</title>
+  <style>
+
+    body {
+      font-family: 'Arial', sans-serif;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      background: #e6f0fa;
+    }
+
+    .sidebar {
+      width: 220px;
+      background-color: #1f2937;
+      color: white;
+      height: 100vh;
+      position: fixed;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    .sidebar h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #facc15;
+    }
+
+    .sidebar a {
+      color: #d1d5db;
+      text-decoration: none;
+      margin: 0.5rem 0;
+      font-weight: bold;
+    }
+
+    .sidebar a:hover {
+      color: #ffffff;
+    }
+    
+    .hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: white;
+  cursor: pointer;
+  position: absolute;
+  top: 2rem;
+  right: 1rem;
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  body.menu-open {
+    overflow: hidden;
+  }
+}
+
+    .main-wrapper {
+      margin-left: 220px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      background-color: #202020;
+      color: white;
+      width: 100%;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    nav {
+      margin-top: 1rem;
+    }
+
+    nav a {
+      margin: 0 10px;
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .countdown-container {
+      margin-top: 2rem;
+      padding: 1rem;
+      border: 2px solid #007bff;
+      border-radius: 10px;
+      background-color: #ffffff;
+      text-align: center;
+      width: 90%;
+      max-width: 600px;
+    }
+
+    .countdown {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      color: #202020;
+    }
+
+    .main-content {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .portrait {
+      max-width: 300px;
+      flex: 1 1 300px;
+      text-align: center;
+    }
+
+    .portrait img {
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .portrait p {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #333;
+    }
+
+    .watch-question {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: #202020;
+      background-color: #f9f9f9;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      font-family: 'Arial', sans-serif;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .donation-section {
+      margin-top: 3rem;
+      padding: 1rem;
+      background-color: rgba(255,255,255,0.9);
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+
+    .donation-section button {
+      margin: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+    }
+
+    .donation-section button:hover {
+      background-color: #0056b3;
+    }
+
+    .copyright {
+      text-align: center;
+      font-size: 0.9rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      .main-wrapper {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+   <button onclick="location.href='kr.korea.html'">한국어</button>
+    <h2>Leader Timer</h2>
+    <a href="index.html">Donald Trump</a>
+    <a href="putin.html">Vladimir Putin</a>    
+    <a href="#donate">Donate</a>
+    <a href="#">About</a>
+  </div>
+
+  <div class="main-wrapper">
+    <header>
+      <h1>Leader Timer</h1>
+      <button id="menu-toggle" class="hamburger" aria-label="Toggle menu">☰</button>
+    </header>
+
+    <nav>
+      <a href="#donate">Donate</a>
+    </nav>
+
+    <div class="countdown-container">
+      <div class="countdown" id="countdown"></div>
+       <div class="countdown-subtext"> "South Korean 21st presidential election"  June 3, 2025</div>
+    </div>
+
+    <div class="main-content">
+      <div class="portrait">
+        <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/LeeJaemyung.jpg" alt="Lee Jaemyung Portrait">
+        <p>Official Portrait of Lee Jaemyung</p>
+        <div class="watch-question">
+          <p>Democratic Presidential candidate of the Republic of Korea</p><br>
+          <p><strong> Lee Jaemyung </strong></p>
+        </div>
+      </div>
+      <div class="portrait">
+        <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/the%20silhouette%20.png" alt="">
+        <p>Silhouette of candidate </p>
+        <div class="watch-question">
+          <p>The Presidential candidate of the conservative party in Republic of Korea has not been decided yet.</p>
+         <p><strong>It will be decided on May 3rd.</strong></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="donation-section" id="donate">
+      <h2>Who will be the President of <br>South Korea??</h2>
+      <p>Let's drink a coffee and Let's see what happens!!</p>
+      <button onclick="window.location.href='https://buymeacoffee.com/'" aria-label="Donate to support the site">Donate</button>
+    </div>
+
+    <footer class="copyright">
+      © 2025 Leader Timer. All rights reserved.
+    </footer>
+    <footer style="font-size: 0.9rem; color: #999; margin-top: 3rem; text-align: center;">
+      This site is for entertainment purposes only. <br>
+      It is not affiliated with any political party or campaign. <br> 
+      All content is user-generated or used under fair use for parody/meme purposes.
+    </footer>
+  </div>
+
+  <script>
+    const toggleButton = document.getElementById('menu-toggle');
+  const sidebar = document.querySelector('.sidebar');
+
+  toggleButton.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+    document.body.classList.toggle('menu-open');
+  });
+    const targetDate = new Date('2025-06-03T12:00:00-05:00');
+    function updateCountdown() {
+      const now = new Date();
+      const distance = targetDate - now;
+      const daysLeft = Math.ceil(distance / (1000 * 60 * 60 * 24));
+     
+      if (distance < 0) {
+        document.getElementById("countdown").innerHTML = "Congratulations! A New Era Begins!";
+      } else {
+        document.getElementById("countdown").innerHTML = `D-${daysLeft}`;
+      }
+    }
+
+    setInterval(updateCountdown, 1000 * 60 * 60);
+    updateCountdown(); 
+  </script>
+</body>
+</html>
