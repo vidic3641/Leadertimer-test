@@ -337,10 +337,10 @@
   <div class="sidebar">
   <button onclick="location.href='index.html'">English</button>
     <h2>Leader Timer</h2>
-    <a href="kr.putin.html">Vladimir Putin</a>
-     <a href="kr.korea.html">S.Korean Presidential Election</a>
-    <a href="#">Home</a>   
-    <a href="#donate">Donate</a>
+    <a href="kr.putin.html">블라디미르 푸틴</a>
+     <a href="kr.korea.html">대한민국 대통령 선거</a> 
+    <a href="#donate">후원</a>
+       <a href="#">Home</a>   
     <a href="#">About</a>
   </div>
   <div class="main-wrapper">
@@ -350,8 +350,8 @@
     <button id="menu-toggle" class="hamburger" aria-label="Toggle menu">☰</button>
       </header>
   <nav>
-    <a href="#vote">Vote</a>
-    <a href="#donate">Donate</a>
+    <a href="#vote">투표하기</a>
+    <a href="#donate">후원하기</a>
   </nav>
 
   <div class="countdown-container">
@@ -366,26 +366,27 @@
     <div class="portrait">
       <img src="https://upload.wikimedia.org/wikipedia/commons/5/56/Donald_Trump_official_portrait.jpg"
       alt="Donald Trump Portrait">
-      <p>Official Portrait of Donald J. Trump</p>
+      <p>도널드 트럼프 47대 미국 대통령</p>
       <div class="watch-question">
-        <p>The most powerful man in the World, Donald Trumpㅡ<br>What's on his wrist?</p>
-        <p>Apple watch or Glaxy Watch?</p>
-        <p><strong>Surprisingly, It's neither!!</strong></p>
+        <p>세계에서 가장 권력있는 남자 트럼프ㅡ<br>그의 손목에는 어떤게 있을까요??</p>
+        <p>애플워치 아니면 갤럭시 워치??</p>
+ <p>혹시 핵 버튼??</p>
+        <p><strong>놀랍게도, 셋 다 아니었습니다!!</strong></p>
       </div>
     </div>
     <div class="vote-section" id="vote">
-      <h2>Cast Your Vote</h2>
-      <p>🔥 You in? or Is he out? 🧯</p>
-      <button onclick="vote('support')" class="vote-red" aria-label="Vote to support Trump">🔥 Fight Fight Fight</button>
-      <button onclick="vote('oppose')" class="vote-blue" aria-label="Vote to oppose Trump">You Fired! 🧯</button>
+      <h2>트럼프에 대해 어떻게<br> 생각하시나요??</br></h2>
+   
+      <button onclick="vote('support')" class="vote-red" aria-label="Vote to support Trump">대통령직을 잘 수행하고 있다</button>
+      <button onclick="vote('oppose')" class="vote-blue" aria-label="Vote to oppose Trump">아쉬움이 많이 남는다</button>
       <canvas id="voteChart" width="300" height="300"></canvas>
       <div class="total-votes" id="totalVotes">Total Votes: 0</div>
     </div>
   </div>
 
   <div class="leader-watches">
-    <h2>Anyone around the world would agree that Donald Trump is an incredibly wealthy man.
-Trump wears a watch that perfectly matches both his image and his bank account.</h2>
+    <h2> 전세계 모든 사람들은 도널드 트럼프가 엄청난<br> 재력가라는 사실을 알고 있습니다.</br>
+    현 미국 대통령은 자신의 명성과 통장 잔고에 완벽히 어울리는 <br>시계들을 차고 다닙니다.</br></h2>
     <div class="watch-gallery">
       <div class="watch-item">
       <br> <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/Vacheron%20Constantin%20historique%201968.jpg" alt="Vacheron Constantin historique ultrafine 1968"><br><br><br><br><br>
@@ -404,8 +405,8 @@ Trump wears a watch that perfectly matches both his image and his bank account.<
   </div>
 
   <div class="donation-section" id="donate">
-    <h2>Who will win??</h2>
-    <p>Fight or Fired, Let's donate and Let's see what happens!!</p>
+    <h2> 도널트 트럼프는 무사히 임기를 마칠 수 있을까요?? </h2>
+    <p>전 세계 리더들의 임기와 <br>흥미로운 이야기를 소개하고 있습니다.</br> 후원은 큰 도움이 되고 있습니다. </p>
     <button onclick="window.location.href='https://buymeacoffee.com/'" aria-label="Donate to support the site">Donate</button>
   </div>
 
@@ -413,9 +414,10 @@ Trump wears a watch that perfectly matches both his image and his bank account.<
     © 2025 Leader Timer. All rights reserved.
   </footer>
   <footer style="font-size: 0.9rem; color: #999; margin-top: 3rem; text-align: center;">
-    This site is for entertainment purposes only. <br>
-    It is not affiliated with any political party or campaign. <br> 
-    All content is user-generated or used under fair use for parody/meme purposes.
+    이 사이트는 엔터테인먼트 목적으로만 제작되었습니다. <br>
+    어떠한 정당 또는 정치적 목적으로도 관련되지 않습니다. <br> 
+   모든 콘텐츠는 사용자가 생성하거나 패러디/밈 목적으로 공정하게 사용됩니다.
+   <br></br>
   </footer>
 
   <script>
@@ -451,10 +453,10 @@ Trump wears a watch that perfectly matches both his image and his bank account.<
       const progress = Math.min(100, Math.max(0, (elapsed / totalTerm) * 100));
 
       document.getElementById("countdownFill").style.width = `${progress}%`;
-      document.getElementById("countdownPercentage").innerText = `Progress: ${progress.toFixed(1)}%`;
+      document.getElementById("countdownPercentage").innerText = `임기 진행도: ${progress.toFixed(1)}%`;
 
       if (distance < 0) {
-        document.getElementById("countdown").innerHTML = "TRUMP'S TIME HAS ENDED.";
+        document.getElementById("countdown").innerHTML = "트럼프의 임기가 종료되었습니다.";
         return;
       }
 
@@ -463,7 +465,7 @@ Trump wears a watch that perfectly matches both his image and his bank account.<
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-      document.getElementById("countdown").innerHTML = `TIME LEFT: ${days}D ${hours}H ${minutes}M ${seconds}S`;
+      document.getElementById("countdown").innerHTML = `남은 임기: ${days}일 ${hours}시간 ${minutes}분 ${seconds}초`;
     }
 
     setInterval(updateCountdown, 1000);
@@ -473,7 +475,7 @@ Trump wears a watch that perfectly matches both his image and his bank account.<
     const voteChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: ['Support', 'Oppose'],
+        labels: ['지지한다', '지지하지 않는다'],
         datasets: [{
           label: 'Votes',
           data: [0, 0],
@@ -512,7 +514,7 @@ Trump wears a watch that perfectly matches both his image and his bank account.<
       const now = Date.now();
       const lastVote = parseInt(localStorage.getItem('lastVoteTime'), 10) || 0;
       if (now - lastVote < 60000) {
-        alert('Just wait. After 1minute, You’ll see.');
+        alert('1분 후에 재투표가 가능합니다.');
         return;
       }
       localStorage.setItem('lastVoteTime', now);
@@ -550,9 +552,9 @@ Trump wears a watch that perfectly matches both his image and his bank account.<
     });
 
     if (type === 'support') {
-      alert("🔥 Make America Great Again.");
+      alert("Make America Great Again - 도널드 트럼프");
     } else if (type === 'oppose') {
-      alert("🧯 God blessed to America.");
+      alert("당신은 해고야!! - 도널드 트럼프");
     }
   }
   </script>
