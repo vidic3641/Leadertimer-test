@@ -314,6 +314,49 @@
             color: #333;
             line-height: 1.4;
         }
+         .donation-section {
+      margin-top: 3rem;
+      padding: 1rem;
+      background-color: rgba(255,255,255,0.9);
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      display: flex; /* 후원 버튼과 이미지를 가로로 배치하기 위해 flexbox 사용 */
+      align-items: center; /* 세로 방향으로 중앙 정렬 */
+      justify-content: center; /* 가로 방향으로 중앙 정렬 */
+      gap: 10px; /* 버튼과 이미지 사이의 간격 조절 */
+      flex-direction: column; /* 내부 요소들을 세로로 배치 (기존 텍스트 유지) */
+    }
+
+    .donation-container {
+      display: flex; /* 후원 버튼과 이미지를 가로로 배치 */
+      align-items: center; /* 세로 방향으로 중앙 정렬 */
+      justify-content: center; /* 가로 방향으로 중앙 정렬 */
+      gap: 10px; /* 버튼과 이미지 사이 간격 */
+      margin-top: 10px; /* 후원 문구와의 간격 조절 */
+    }
+
+    .donation-image {
+      max-width: 120px; /* 이미지의 최대 너비 조절 */
+      height: auto; /* 이미지 비율 유지 */
+      border-radius: 5px; /* 이미지에 약간의 둥근 테두리 적용 (선택 사항) */
+    }
+
+    .donation-section button {
+      margin: 0.5rem 0; /* 위아래 마진 조정 */
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #FEE500; /* 카카오페이 색상 유지 */
+      color: #000; /* 카카오페이 색상 유지 */
+    }
+
+    .donation-section button:hover {
+      background-color: #fdd835; /* 호버 시 약간 밝게 */
 
         .copyright {
             text-align: center;
@@ -409,6 +452,7 @@
            <button onclick="window.location.href='https://qr.kakaopay.com/Ej7mWo71U'" aria-label="Donate to support the site"
     style="background-color:#FEE500; color:#000; padding:10px 20px; border:none; border-radius:8px; font-size:16px;">
     카카오페이로 후원하기</button>
+     <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/qrcode%20for%20donating.jpg" alt="후원 관련 이미지" class="donation-image">
         </div>
 
         <footer class="copyright">
