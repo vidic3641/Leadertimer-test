@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>World Leader Timer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background: #e6f0fa;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: #1f2937;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .sidebar h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #facc15;
+        }
+
+        .sidebar a {
+            color: #d1d5db;
+            text-decoration: none;
+            margin: 0.5rem 0;
+            font-weight: bold;
+        }
+
+        .sidebar a:hover {
+            color: #ffffff;
+        }
+
+        .hamburger {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            color: white;
+            cursor: pointer;
+            position: absolute;
+            top: 2rem;
+            right: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: block;
+            }
+
+            .sidebar {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 1000;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            body.menu-open {
+                overflow: hidden;
+            }
+        }
+
+        .main-wrapper {
+            margin-left: 220px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: #202020;
+            color: white;
+            width: 100%;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        nav {
+            margin-top: 1rem;
+        }
+
+        nav a {
+            margin: 0 10px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .countdown-container {
+            margin-top: 2rem;
+            padding: 1rem;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            background-color: #ffffff;
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .countdown {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            color: #202020;
+        }
+
+        .countdown-bar {
+            display: none; /* 진행률 바 숨김 */
+        }
+
+        .countdown-fill {
+            height: 100%;
+            background-color: #007bff;
+            transition: width 0.5s ease;
+            width: 0%; /* 초기 너비 0으로 설정 */
+        }
+
+        .countdown-percentage {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #202020;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            display: none; /* 퍼센테이지 숨김 */
+        }
+
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .portrait {
+            max-width: 300px;
+            flex: 1 1 300px;
+            text-align: center;
+        }
+
+        .portrait img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .portrait p {
+            margin-top: 0.5rem;
+            font-size: 0.95rem;
+            color: #333;
+        }
+
+        .watch-question {
+            margin-top: 1rem;
+            font-size: 1rem;
+            color: #202020;
+            background-color: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .watch-question p {
+            margin: 0.5rem 0;
+        }
+
+        .vote-section {
+            flex: 1 1 300px;
+            max-width: 400px;
+            background-color: rgba(255,255,255,0.9);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .vote-red {
+            margin: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .vote-red:hover {
+            background-color: #b91c1c;
+        }
+
+        .vote-blue {
+            margin: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .vote-blue:hover {
+            background-color: #1d4ed8;
+        }
+
+        .donation-section {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: rgba(255,255,255,0.9);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .donation-section button {
+            margin: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+        }
+
+        .donation-section button:hover {
+            background-color: #0056b3;
+        }
+
+        canvas {
+            margin-top: 1rem;
+            max-width: 100%;
+        }
+
+        .total-votes {
+            margin-top: 0.5rem;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #444;
+        }
+
+        .leader-watches {
+            margin-top: 3rem;
+            padding: 1rem;
+            background-color: #f4faff;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 95%;
+            text-align: center;
+        }
+
+        .leader-watches h2 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: #202020;
+        }
+
+        .watch-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+                   }
+
+        .watch-item {
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 0.75rem;
+            max-width: 180px;
+            flex: 1 1 160px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .watch-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+
+        .watch-item p {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #333;
+            line-height: 1.4;
+        }
+        .donation-section {
+      margin-top: 3rem;
+      padding: 1rem;
+      background-color: rgba(255,255,255,0.9);
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      display: flex; /* 후원 버튼과 이미지를 가로로 배치하기 위해 flexbox 사용 */
+      align-items: center; /* 세로 방향으로 중앙 정렬 */
+      justify-content: center; /* 가로 방향으로 중앙 정렬 */
+      gap: 10px; /* 버튼과 이미지 사이의 간격 조절 */
+      flex-direction: column; /* 내부 요소들을 세로로 배치 (기존 텍스트 유지) */
+    }
+
+    .donation-container {
+      display: flex; /* 후원 버튼과 이미지를 가로로 배치 */
+      align-items: center; /* 세로 방향으로 중앙 정렬 */
+      justify-content: center; /* 가로 방향으로 중앙 정렬 */
+      gap: 10px; /* 버튼과 이미지 사이 간격 */
+      margin-top: 10px; /* 후원 문구와의 간격 조절 */
+    }
+
+    .donation-image {
+      max-width: 120px; /* 이미지의 최대 너비 조절 */
+      height: auto; /* 이미지 비율 유지 */
+      border-radius: 5px; /* 이미지에 약간의 둥근 테두리 적용 (선택 사항) */
+    }
+
+    .donation-section button {
+      margin: 0.5rem 0; /* 위아래 마진 조정 */
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #FEE500; /* 카카오페이 색상 유지 */
+      color: #000; /* 카카오페이 색상 유지 */
+    }
+
+    .donation-section button:hover {
+      background-color: #fdd835; /* 호버 시 약간 밝게 */
+    }
+
+        .copyright {
+            text-align: center;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .main-wrapper {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <button onclick="location.href='conclave.html'">English</button>
+        <h2>Leader Timer</h2>
+        <a href="kr.index.html">Donald Trump</a>
+        <a href="kr.putin.html">Vladimir Putin</a>
+        <a href="kr.korea.html">S.Korean Presidential Election</a>
+        <a href="kr.bill gates.html">Bill Gates</a>
+        <a href="kr.conclave.html">Pope LEO XIV</a>
+        <a href="#">Home</a>
+        <a href="#donate">Donate</a>
+        <a href="#">About</a>
+    </div>
+    <div class="main-wrapper">
+
+        <header>
+            <h1>Leader Timer</h1>
+            <button id="menu-toggle" class="hamburger" aria-label="Toggle menu">☰</button>
+        </header>
+        <nav>
+            <a href="#vote">투표하가</a>
+            <a href="#donate">후원하기</a>
+        </nav>
+
+        <div class="countdown-container">
+            <div class="countdown" id="countdown"></div>
+            <div class="countdown-bar">
+                <div class="countdown-fill" id="countdownFill"></div>
+            </div>
+            <div class="countdown-percentage" id="countdownPercentage">Elapsed: 0.0%</div>
+        </div>
+
+        <div class="main-content">
+            <div class="portrait">
+                <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/Robert%20Francis%20Prevost%20-%20Pope%20267th.jpg"
+                    alt="Rober Francis Prevost">
+                <p>교황 "레오 14세" / Robert Francis Prevost</p>
+                <div class="watch-question">
+                    <p><strong>첫 미국 출신 교황.</strong><br>
+                    새로운 교황이 첫 미국인으로 선출된 것에 모든 사람이 놀랐습니다. </p>
+                   <p>그는 1955년 미국 시카고에서 출신입니다.<br>그는 새로운 즉위명을 <br>"LEO 14세"로 명명했습니다. <br> </p>
+                </div>
+            </div>
+            <div class="vote-section" id="vote">
+                <h2>"레오 14세"에 대하여 어떻게 생각하시나요??</h2>
+                    <button onclick="vote('support')" class="vote-red" aria-label="support">긍정적이다</button>
+                <button onclick="vote('oppose')" class="vote-blue" aria-label="oppose">부정적이다</button>
+                <canvas id="voteChart" width="300" height="300"></canvas>
+                <div class="total-votes" id="totalVotes">Total Votes: 0</div>
+            </div>
+        </div>
+
+       <div class="leader-watches">
+  <h2>"콘클라베"에 대해 들어보셨나요????<br>
+    "콘클라베는" 교황청에서 새로운 교황을 추대할 때 거행되는 의식입니다.
+    새로운 교황을 선출하기 위해서는 2/3의 득표를 얻어야 합니다. 콘클라베가 진행되는 동안 추기경들은 투표가 진행되는 성당의 문을 걸어 잠그고 외부인과의 접촉을 금하는데 그 것은 아무도 밖으로 나갈 수 없음을 의미합니다. 
+   <br> "콘클라베"의 유래는 라틴어에서 파생되었는데  <br>"열쇠와 함께 잠겨진 방" 이라는 의미입니다."<br>
+   외부인들은 새로운 교황이 추대될 때까지 아무런 소식을 접할 수 없어서
+   바티칸의 "시스티나" 성당의 굴뚝을 통해 검은 연기 또는 하얀 연기를 통해서만 소식을 알 수 있었습니다.   
+  </h2>
+
+  <div class="watch-gallery" style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; margin-top: 20px;">
+    <div class="watch-item" style="width: 250px; text-align: center; background-color: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/conclave%20black%20smoke.jpg" alt="Conclave Black smoke" style="width: 100%; height: auto; border-radius: 8px;" /><br><br>
+      <p style="font-size: 14px; margin-top: 10px;"><strong>검은 연기가 피어오르면 투표가 결렬되었음을 의미합니다. </strong></p>
+    </div>
+
+    <div class="watch-item" style="width: 250px; text-align: center; background-color: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/conclave.jpg" alt="The Conclave" style="width: 100%; height: auto; border-radius: 8px;" /><br><br>
+      <p style="font-size: 14px; margin-top: 10px;"><strong>콘클라베</strong><br><br>새로운 교황이 선출되기 전까지, 아무도 나갈 수 없습니다.</p>
+    </div>
+
+    <div class="watch-item" style="width: 250px; text-align: center; background-color: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/conclave%20white%20smoke.jpg" alt="Conclave white smoke" style="width: 100%; height: auto; border-radius: 8px;" /><br><br>
+      <p style="font-size: 14px; margin-top: 10px;"><strong>새로운 교황이 선출되었을 때 비로소 바티칸 시스티나 성당의 굴뚝에서 하얀 연기가 피어오릅니다. </strong></p>
+    </div>
+  </div>
+</div>
+
+<div class="donation-section" id="donate">
+            <h2> "Habemus Papam!!" </h2>
+            <p> <strong>새 교황이 선출 되었을때 "하베무스 파팜"이라고 외칩니다.</strong> <br> 새로운 교황의 선출을 축하한다는 의밍비니다.
+<br>2025년 5월 8일, 267대 교황 "레오 14세"가 탄생했습니다. 다같이 외쳐볼까요?? 하베무스 파팜!!.
+</p>
+           <button onclick="window.location.href='https://qr.kakaopay.com/Ej7mWo71U'" aria-label="Donate to support the site"
+          style="background-color:#FEE500; color:#000; padding:10px 20px; border:none; border-radius:8px; font-size:16px;">카카오페이로 후원하기</button>
+        <img src="https://raw.githubusercontent.com/vidic3641/LeaderTimer/main/qrcode%20for%20donating.jpg" alt="후원 관련 이미지" class="donation-image">
+  </div>
+
+        <footer class="copyright">
+            © 2025 Leader Timer. All rights reserved.
+        </footer>
+        <footer style="font-size: 0.9rem; color: #999; margin-top: 3rem; text-align: center;">
+            이 사이트는 엔터테인먼트 목적으로만 제작되었습니다. <br>
+    어떠한 정당 또는 정치적 목적으로도 관련되지 않습니다. <br> 
+   모든 콘텐츠는 사용자가 생성하거나 패러디/밈 목적으로 공정하게 사용됩니다.
+        </footer>
+
+        <script>
+        const toggleButton = document.getElementById('menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        toggleButton.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            document.body.classList.toggle('menu-open');
+        });
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyDotg3B6aWHRLlXSbvOdnNjip_S4gJzfhg",
+                authDomain: "donaldtrumph.firebaseapp.com",
+                projectId: "donaldtrumph",
+                storageBucket: "donaldtrumph.appspot.com",
+                messagingSenderId: "1073403134400",
+                appId: "1:1073403134400:web:974bf46acf3f2b5537c825",
+                measurementId: "G-BGB3LM1GRW"
+            };
+
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+
+            const startDate = new Date('2025-05-08T00:00:00');
+
+            function updateCountdown() {
+                const now = new Date();
+                const elapsedMilliseconds = now - startDate;
+                const elapsedDays = Math.floor(elapsedMilliseconds / (1000 * 60 * 60 * 24));
+                const years = Math.floor(elapsedDays / 365.25);
+                const remainingDays = Math.floor(elapsedDays - (years * 365.25));
+
+                document.getElementById("countdown").innerText = `Leo 14세가 즉위한지 ${years} 년${remainingDays} 일 지났습니다  즉위 : 2025년 5월 8일`;
+            }
+
+            setInterval(updateCountdown, 1000 * 60 * 60 * 24);
+            updateCountdown();
+
+            const ctx = document.getElementById('voteChart').getContext('2d');
+            const voteChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Support', 'Oppose'],
+                    datasets: [{
+                        label: 'Votes',
+                        data: [0, 0],
+                        backgroundColor: ['red', 'blue'],
+                        borderColor: ['white', 'white'],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        },
+        cutout: '70%'
+      },
+      plugins: [{
+        id: 'percentageText',
+        afterDraw(chart) {
+          const { ctx, chartArea: { width, height } } = chart;
+          const [support, oppose] = chart.data.datasets[0].data;
+          const total = support + oppose;
+          const sPct = total ? Math.round((support / total) * 100) : 0;
+          const oPct = total ? Math.round((oppose / total) * 100) : 0;
+
+          ctx.save();
+          ctx.font = 'bold 28px Arial';
+          ctx.fillStyle = 'black';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`${sPct}:${oPct}`, chart.width / 2, chart.height / 2);
+        }
+      }]
+    });
+
+    async function vote(type) {
+      const now = Date.now();
+      const lastVote = parseInt(localStorage.getItem('lastVoteTime'), 10) || 0;
+      if (now - lastVote < 60000) {
+        alert('1분 후에 재투표 가능합니다');
+        return;
+      }
+      localStorage.setItem('lastVoteTime', now);
+      castVote(type);
+    }
+
+    function updateChart(support, oppose) {
+      voteChart.data.datasets[0].data = [support, oppose];
+      voteChart.update();
+      document.getElementById('totalVotes').innerText = `Total Votes: ${support + oppose}`;
+    }
+
+    function observeVotes() {
+      db.collection('votes').doc('conclave').onSnapshot((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          updateChart(data.support, data.oppose);
+        }
+      });
+    }
+
+    observeVotes();
+
+     async function castVote(type) {
+    const voteRef = db.collection('votes').doc('conclave');
+    const doc = await voteRef.get();
+
+    if (!doc.exists) {
+      await voteRef.set({ support: 0, oppose: 0 });
+    }
+
+    const field = type === 'support' ? 'support' : 'oppose';
+    await voteRef.update({
+      [field]: firebase.firestore.FieldValue.increment(1)
+    });
+
+    if (type === 'support') {
+      alert("하베무스 파팜!!.");
+    } else if (type === 'oppose') {
+      alert("신의 가호가 있기를");
+    }
+  }
+  </script>
+</body>
+</html>
+
+                        
